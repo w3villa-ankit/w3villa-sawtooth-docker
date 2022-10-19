@@ -1,0 +1,101 @@
+version: "2.1"
+services:
+  validator:
+    image: w3villa/sawtooth:latest
+    container_name: validator
+    working_dir: /app/
+    ports:
+      - "4004:4004"
+      - "8800:8800"
+      - "5050:5050"
+    command: "bash -c \"
+        sawtooth keygen --force && \
+        sawadm keygen --force && \
+        sawtooth-validator -vv \
+        --bind network:tcp://0.0.0.0:8800 \
+        --bind component:tcp://0.0.0.0:4004 \
+        --bind consensus:tcp://0.0.0.0:5050 \
+        --peering static \
+        --endpoint tcp://130.198.22.29:8800  \
+        --peers tcp://130.198.21.110:8800,tcp://130.198.12.127:8800,tcp://130.198.10.71:8800 \
+        --scheduler parallel \
+        --network-auth trust 
+    \""
+    # stop_signal: SIGKILL
+  rest-api:
+    image: w3villa/sawtooth:latest
+    container_name: sawtooth-rest-api
+    ports:
+      - "8008:8008"
+    depends_on:
+      - validator
+    command: |
+      bash -c " 
+      sawtooth-rest-api -vv \
+      --connect tcp://130.198.22.29:4004 \
+      --bind 0.0.0.0:8008 
+      "
+    # stop_signal: SIGKILL  
+  settings-tp:
+    image: w3villa/sawtooth:latest
+    container_name: sawtooth-settings-tp
+    ports:
+      - "4004"
+    depends_on:
+      - validator
+      - rest-api  
+    command: |
+      bash -c "
+      settings-tp -v -C tcp://130.198.22.29:4004
+      "
+    stop_signal: SIGKILL
+  intkey-tp:
+    image: w3villa/sawtooth:latest
+    container_name: sawtooth-intkey-tp
+    ports:
+      - "4004"
+    depends_on:
+      - validator
+      - rest-api  
+    command: |
+      bash -c "
+      intkey-tp-python -v -C tcp://130.198.22.29:4004
+      "
+    # stop_signal: SIGKILL
+  xo-tp:
+    image: w3villa/sawtooth:latest
+    container_name: sawtooth-xo-tp
+    ports:
+      - "4004"
+    depends_on:
+      - validator
+      - rest-api  
+    command: |
+      bash -c "
+      xo-tp-python -vv -C tcp://130.198.22.29:4004
+      "
+    # stop_signal: SIGKILL
+  poet-validator-registry-tp:
+    image: w3villa/sawtooth:latest
+    container_name: poet-validator
+    ports:
+      - "4004"
+    depends_on:
+      - validator
+      - rest-api  
+    command: |
+      bash -c "
+      poet-validator-registry-tp -v -C tcp://130.198.22.29:4004
+      "
+    # stop_signal: SIGKILL
+  poet-engine:
+    image: w3villa/sawtooth:latest
+    container_name: poet-engine
+    depends_on:
+      - validator
+      - rest-api
+    command: |
+      bash -c "
+      poet-engine -vv -C tcp://130.198.22.29:5050 --component tcp://130.198.22.29:4004
+      "
+    # stop_signal: SIGKILL
