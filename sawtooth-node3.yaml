@@ -16,8 +16,8 @@ services:
         --bind component:tcp://0.0.0.0:4004 \
         --bind consensus:tcp://0.0.0.0:5050 \
         --peering static \
-        --endpoint tcp:///bcd3.kleinschmidt.com:8800  \
-        --peers tcp://bcd1.kleinschmidt.com:8800,tcp://bcd2.kleinschmidt.com:8800,tcp://bcd4.kleinschmidt.com:8800 \
+        --endpoint tcp:///69.128.144.195:8800  \
+        --peers tcp://69.128.144.193:8800,tcp://69.128.144.194:8800,tcp://69.128.144.196:8800 \
         --scheduler parallel \
         --network-auth trust 
     \""
@@ -32,7 +32,7 @@ services:
     command: |
       bash -c " 
       sawtooth-rest-api -vv \
-      --connect tcp:///bcd3.kleinschmidt.com:4004 \
+      --connect tcp:///69.128.144.195:4004 \
       --bind 0.0.0.0:8008 
       "
     # stop_signal: SIGKILL  
@@ -46,7 +46,7 @@ services:
       - rest-api  
     command: |
       bash -c "
-      settings-tp -v -C tcp:///bcd3.kleinschmidt.com:4004
+      settings-tp -v -C tcp:///69.128.144.195:4004
       "
     stop_signal: SIGKILL
   intkey-tp:
@@ -59,7 +59,7 @@ services:
       - rest-api  
     command: |
       bash -c "
-      intkey-tp-python -v -C tcp:///bcd3.kleinschmidt.com:4004
+      intkey-tp-python -v -C tcp:///69.128.144.195:4004
       "
     # stop_signal: SIGKILL
   xo-tp:
@@ -72,7 +72,7 @@ services:
       - rest-api  
     command: |
       bash -c "
-      xo-tp-python -vv -C tcp:///bcd3.kleinschmidt.com:4004
+      xo-tp-python -vv -C tcp:///69.128.144.195:4004
       "
     # stop_signal: SIGKILL
   poet-validator-registry-tp:
@@ -85,7 +85,7 @@ services:
       - rest-api  
     command: |
       bash -c "
-      poet-validator-registry-tp -v -C tcp:///bcd3.kleinschmidt.com:4004
+      poet-validator-registry-tp -v -C tcp:///69.128.144.195:4004
       "
     # stop_signal: SIGKILL
   poet-engine:
@@ -96,6 +96,6 @@ services:
       - rest-api
     command: |
       bash -c "
-      poet-engine -vv -C tcp:///bcd3.kleinschmidt.com:5050 --component tcp:///bcd3.kleinschmidt.com:4004
+      poet-engine -vv -C tcp:///69.128.144.195:5050 --component tcp:///69.128.144.195:4004
       "
     # stop_signal: SIGKILL
